@@ -79,7 +79,8 @@ CPCB NAQI (cpcb.nic.in) · IMD Mausam (mausam.imd.gov.in) · Open-Meteo (open-me
 
 ## Team
 Team **Weathermon** · 
-Team **Bishal Borah
+Team name:
+        **Bishal Borah
         Simanta kalita
         Nishant Chetry
         Jangsar Muchahari
