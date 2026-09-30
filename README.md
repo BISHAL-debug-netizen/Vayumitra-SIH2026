@@ -79,11 +79,11 @@ CPCB NAQI (cpcb.nic.in) · IMD Mausam (mausam.imd.gov.in) · Open-Meteo (open-me
 
 ## Team
 Team **Weathermon** · 
-Team name:
-        **Bishal Borah
+Team member name:
+        Bishal Borah
         Simanta kalita
         Nishant Chetry
         Jangsar Muchahari
         Shyamanta Kachari
-        Daizee Brahma**
+        Daizee Brahma
 · Smart India Hackathon 2026
