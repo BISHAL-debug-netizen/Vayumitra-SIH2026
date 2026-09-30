@@ -1,11 +1,8 @@
 # VayuMitra — SIH starter for Indian AQI
 
-Original student-owned starter. It is **not** the paid source code from the YouTube video
+
 `Air Quality Index Prediction using Python & Machine Learning` (codeAj Marketplace).
 
-That video sells a Flask + Random Forest final-year project. Using purchased code as
-an SIH submission is risky: it is not original, judges can spot template UIs, and
-the marketplace terms forbid resale / redistribution.
 
 ## What this starter does
 
