@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VayuMitra — Live weather & Indian AQI</title>
+  
+  <!-- Chart.js Library -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!--google material symbol -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+  
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body class="theme-day-clear">
+  
+  <!-- 1. THE SKY: Fixed as a background layer so the moon is never hidden -->
+  <div class="sky" aria-hidden="true" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none;">
+    <div class="sun-glow"></div>
+    <div class="sun-rays"></div>
+    <div class="sun"></div>
+    <div class="haze"></div>
+    <div class="cirrus"></div>
+    <div class="moon"></div>
+    <div class="stars"></div>
+    <div class="clouds"></div>
+    <div class="fog"></div>
+    <div class="rain" id="rain-layer"></div>
+    <div class="snow" id="snow-layer"></div>
+    <div class="lightning"></div>
+    <div class="horizon"></div>
+  </div>
+
+  <!-- 2. APP LAYOUT: Splits screen into Left Sidebar and Right Content -->
+  <div class="app-layout">
+    
+    <!-- 3. VERTICAL SIDEBAR -->
+    <nav class="sidebar" id="app-sidebar">
+      <!-- 3-Lines (Hamburger) Icon -->
+      <div class="menu-icon" title="Menu" onclick="toggleSidebar()">☰</div>
+      
+      <!-- Icons with hidden text labels -->
+     <!-- Icon-only Tabs with hidden text labels -->
+      <button type="button" class="dash-tab active" onclick="openTab('tab-live', this)" title="Live & Forecast">
+        <span class="material-symbols-outlined icon">space_dashboard</span>
+        <span class="tab-text">Live & Forecast</span>
+      </button>
+      
+      <button type="button" class="dash-tab" onclick="openTab('tab-advisor', this)" title="Personal Advisor">
+        <span class="material-symbols-outlined icon">health_and_safety</span>
+        <span class="tab-text">Personal Advisor</span>
+      </button>
+      
+      <button type="button" class="dash-tab" onclick="openTab('tab-hourly', this)" title="24h Hourly">
+        <span class="material-symbols-outlined icon">schedule</span>
+        <span class="tab-text">24h Hourly</span>
+      </button>
+      
+      <button type="button" class="dash-tab" onclick="openTab('tab-manual', this)" title="Manual Simulator">
+        <span class="material-symbols-outlined icon">science</span>
+        <span class="tab-text">Manual Simulator</span>
+      </button>
+    </nav>
+
+    <!-- 4. MAIN SCROLLABLE CONTENT -->
+    <div class="main-content">
+      
+      <!-- COMPACT HEADER -->
+      <header style="display: flex; justify-content: space-between; align-items: center; padding: 10px 0; margin-bottom: 10px;">
+  <div>
+    <h1 style="margin: 0; font-size: 1.8rem; display: inline-block;">VayuMitra</h1>
+    <p class="lede" style="margin: 2px 0 0 0; font-size: 0.85rem; opacity: 0.8;">Mausam Dashboard · Indian CPCB AQI</p>
+  </div>
+</header>
+
+      <!-- TOOLBAR (Search Bar now has max-width: 500px) -->
+      <section class="toolbar card" style="padding: 10px 16px; margin-bottom: 12px; max-width: 500px;">
+        <label class="grow">City
+          <input list="city-list" id="city-input" value="Guwahati" />
+          <datalist id="city-list">
+            {% for c in cities %}
+            <option value="{{ c }}"></option>
+            {% endfor %}
+          </datalist>
+        </label>
+        <button type="button" id="live-btn">Get live weather & AQI</button>
+      </section>
+
+      <p class="status hint" id="status" style="margin: 6px 0 10px 0;">Pick a city and load the live report. Internet is required.</p>
+
+      <!-- TAB 1: LIVE & FORECAST -->
+      <div id="tab-live" class="tab-pane active">
+        <section class="now-grid" id="now-grid" hidden>
+          <article class="card hero" id="weather-now"></article>
+          <article class="card hero" id="aqi-now"></article>
+        </section>
+
+        <section class="card" id="outlook-card" hidden>
+          <h2>Forecast outlook</h2>
+          <p id="outlook"></p>
+          <p class="hint" id="source-note"></p>
+        </section>
+
+        <section class="card" id="daily-card" hidden>
+          <h2>7-day weather + AQI peak</h2>
+          <div class="days" id="days"></div>
+          
+          <!-- Chart Canvas inside the Live Tab -->
+          <div style="margin-top: 30px;">
+            <canvas id="aqiChart"></canvas>
+          </div>
+        </section>
+      </div>
+
+      <!-- TAB 2: PERSONAL ADVISOR -->
+      <div id="tab-advisor" class="tab-pane">
+        <section class="card advisor" id="advisor-card" hidden>
+          <h2>Personal Weather Advisor</h2>
+          <p class="hint">Weather comfort for plans — not a medical check and not a diagnosis.</p>
+          <div id="advisor-body"></div>
+          <details class="advisor-personalize" open>
+            <summary>Personalize my advice (optional)</summary>
+            <p class="hint">Selections stay in this browser tab only. Skip anything you do not want to share.</p>
+            <form id="advisor-form">
+              {% for group in ['General', 'Activity', 'Optional sensitivity'] %}
+              <p class="advisor-group">{{ group }}</p>
+              <div class="chip-row">
+                {% for opt in profile_options if opt.group == group %}
+                <label class="chip">
+                  <input type="checkbox" name="pref" value="{{ opt.id }}" />
+                  {{ opt.label }}
+                </label>
+                {% endfor %}
+              </div>
+              {% endfor %}
+              <label>Outdoor duration
+                <select name="duration">
+                  <option value="">Not specified</option>
+                  <option value="short">Under 2 hours</option>
+                  <option value="half_day">Half day outdoors</option>
+                  <option value="full_day">Most of the day outdoors</option>
+                </select>
+              </label>
+              <button type="submit">Update comfort advice</button>
+            </form>
+          </details>
+        </section>
+      </div>
+
+      <!-- TAB 3: HOURLY BREAKDOWN -->
+      <div id="tab-hourly" class="tab-pane">
+        <section class="split" id="hourly-wrap" hidden>
+          <article class="card">
+            <h2>Next 24 hours — weather</h2>
+            <div class="table-wrap" id="hourly-weather"></div>
+          </article>
+          <article class="card">
+            <h2>Next 24 hours — Indian AQI</h2>
+            <div class="table-wrap" id="hourly-aqi"></div>
+          </article>
+        </section>
+      </div>
+
+      <!-- TAB 4: MANUAL SIMULATOR -->
+      <div id="tab-manual" class="tab-pane">
+        <main>
+          <section class="card">
+            <h2>Manual station reading</h2>
+            <p class="hint">Use this if you already have pollutant numbers from CPCB / SAMEER.</p>
+            <form id="form">
+              <label>City
+                <select name="city" id="city">
+                  {% for c in cities %}
+                  <option value="{{ c }}" {% if c == default_city %}selected{% endif %}>{{ c }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+              <label>Month
+                <input type="number" name="month" min="1" max="12" value="8" />
+              </label>
+              <label>PM2.5 (µg/m³)
+                <input type="number" step="0.1" name="pm25" value="92" required />
+              </label>
+              <label>PM10 (µg/m³)
+                <input type="number" step="0.1" name="pm10" value="168" required />
+              </label>
+              <label>NO₂ (µg/m³)
+                <input type="number" step="0.1" name="no2" value="48" />
+              </label>
+              <label>SO₂ (µg/m³)
+                <input type="number" step="0.1" name="so2" value="14" />
+              </label>
+              <label>CO (mg/m³)
+                <input type="number" step="0.1" name="co" value="1.4" />
+              </label>
+              <label>O₃ (µg/m³)
+                <input type="number" step="0.1" name="o3" value="31" />
+              </label>
+              <label>Temp (°C)
+                <input type="number" step="0.1" name="temp_c" value="16" />
+              </label>
+              <label>Humidity (%)
+                <input type="number" step="0.1" name="humidity" value="72" />
+              </label>
+              <label>Wind (m/s)
+                <input type="number" step="0.1" name="wind_ms" value="1.2" />
+              </label>
+              <button type="submit">Compute AQI from numbers</button>
+            </form>
+          </section>
+      
+          <section class="card result" id="result">
+            <h2>Manual result</h2>
+            <p class="hint">Submit pollutant numbers to see CPCB AQI.</p>
+            <div id="out"></div>
+            <div class="bars" id="bars"></div>
+          </section>
+        </main>
+      </div>
+
+      <footer>
+        Weather and CAMS air-quality forecasts: Open-Meteo. Indian AQI is calculated here with CPCB breakpoints. Not an official government bulletin.
+      </footer>
+      
+    </div> <!-- END MAIN SCROLLABLE CONTENT -->
+  </div> <!-- END APP LAYOUT -->
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
