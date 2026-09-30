@@ -61,7 +61,9 @@ templates/        index.html (SPA)
 static/css/       style.css
 static/js/        app.js
 models/           aqi_rf.joblib
-docs/             SIH presentation
+aqi_train.csv     Data
+train_model.py    Train the machine model using historical environment data
+
 ```
 
 ## NAQI categories
@@ -76,7 +78,11 @@ Good 0-50 · Satisfactory 51-100 · Moderate 101-200 · Poor 201-300 · Very Poo
 CPCB NAQI (cpcb.nic.in) · IMD Mausam (mausam.imd.gov.in) · Open-Meteo (open-meteo.com) · WAQI (aqicn.org/api) · Data.gov.in · scikit-learn
 
 ## Team
-Team **[Team Name]** · Team ID **[Team ID]** · Smart India Hackathon 2026
-
-## License
-MIT - see [LICENSE](LICENSE).
+Team **Weathermon** · 
+Team **Bishal Borah
+        Simanta kalita
+        Nishant Chetry
+        Jangsar Muchahari
+        Shyamanta Kachari
+        Daizee Brahma**
+· Smart India Hackathon 2026
