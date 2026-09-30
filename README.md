@@ -78,12 +78,11 @@ Good 0-50 · Satisfactory 51-100 · Moderate 101-200 · Poor 201-300 · Very Poo
 CPCB NAQI (cpcb.nic.in) · IMD Mausam (mausam.imd.gov.in) · Open-Meteo (open-meteo.com) · WAQI (aqicn.org/api) · Data.gov.in · scikit-learn
 
 ## Team
-Team **Weathermon** · 
-Team member name:
-        Bishal Borah
-        Simanta kalita
-        Nishant Chetry
-        Jangsar Muchahari
-        Shyamanta Kachari
-        Daizee Brahma
+## Team Weathermon (SIH 2026)
+* **Bishal Borah**
+* **Simanta Kalita**
+* **Nishant Chetry**
+* **Jangsar Muchahari**
+* **Shyamanta Kachari**
+* **Daizee Brahma**
 · Smart India Hackathon 2026
