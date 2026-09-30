@@ -1,0 +1,426 @@
+:root {
+  --bg: #87b7ff;
+  --bg2: #f3e2c4;
+  --card: rgba(16, 24, 34, 0.62);
+  --ink: #f6f3ee;
+  --muted: #d7e0ea;
+  --line: rgba(255, 255, 255, 0.16);
+  --accent: #ffd37a;
+  --sun: #ffd56a;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  margin: 0;
+  color: var(--ink);
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+  background-attachment: fixed;
+  transition: background 0.8s ease, color 0.4s ease;
+  overflow-x: hidden;
+}
+body.theme-sunrise-clear { --bg: #f6b27a; --bg2: #7ec8ff; --accent: #ffefb0; --sun: #ffd36b; }
+body.theme-sunrise-cloudy, body.theme-sunrise-fog { --bg: #c9927a; --bg2: #8aa0b8; --accent: #ffd7a1; }
+body.theme-sunrise-rain, body.theme-sunrise-storm { --bg: #8d6d6a; --bg2: #4d5d70; --accent: #cfe3ff; }
+body.theme-day-clear {
+  --bg: #7eb8e4;
+  --bg2: #f3efe4;
+  --accent: #2f6ea3;
+  --ink: #1c2c3a;
+  --muted: #3d5366;
+  --card: rgba(255, 252, 247, 0.62);
+  --line: rgba(40, 64, 84, 0.12);
+  --sun: #fff4c2;
+  background:
+    linear-gradient(180deg,
+      #6aa8d8 0%,
+      #8ec4e8 28%,
+      #c5dff0 58%,
+      #efe6cf 82%,
+      #f6f0e2 100%);
+}
+body.theme-day-cloudy { --bg: #8aa4bb; --bg2: #d5dee6; --accent: #e8f1ff; --ink: #142230; --muted: #3b4d5e; --card: rgba(255,255,255,0.52); --line: rgba(16,32,51,0.12); }
+body.theme-day-fog { --bg: #b7c2c8; --bg2: #e7ecee; --accent: #f4f7f8; --ink: #223039; --muted: #4b5b64; --card: rgba(255,255,255,0.45); }
+body.theme-day-rain, body.theme-day-storm { --bg: #4d6780; --bg2: #1e2d3b; --accent: #9fd4ff; --card: rgba(12, 20, 30, 0.58); }
+body.theme-day-snow { --bg: #9ec3de; --bg2: #eef6fb; --ink: #163044; --muted: #3d5566; --card: rgba(255,255,255,0.55); }
+body.theme-sunset-clear { --bg: #ff7a45; --bg2: #2a1a4a; --accent: #ffd29a; --sun: #ffb45c; }
+body.theme-sunset-cloudy, body.theme-sunset-fog { --bg: #c46a4e; --bg2: #2c2438; --accent: #ffc9a0; }
+body.theme-sunset-rain, body.theme-sunset-storm { --bg: #6a3b3a; --bg2: #1a1c2c; --accent: #ffb38a; }
+body.theme-night-clear { --bg: #071330; --bg2: #1a1030; --accent: #c9dcff; --sun: #f3f1de; }
+body.theme-night-cloudy, body.theme-night-fog { --bg: #121821; --bg2: #2a313a; --accent: #d5dde6; }
+body.theme-night-rain, body.theme-night-storm { --bg: #0b121b; --bg2: #1a2430; --accent: #8ecbff; }
+body.theme-night-snow { --bg: #152033; --bg2: #3c4d63; --accent: #e8f3ff; }
+
+.sky { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+.horizon {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 28vh;
+  background: linear-gradient(180deg, transparent, rgba(0,0,0,0.18));
+}
+body.theme-day-clear .horizon {
+  height: 34vh;
+  background: linear-gradient(180deg, transparent 0%, rgba(255, 236, 196, 0.18) 40%, rgba(236, 214, 168, 0.28) 100%);
+}
+.sun, .moon, .sun-glow, .sun-rays {
+  position: absolute; border-radius: 50%; opacity: 0;
+  transition: opacity 0.6s ease, top 1s ease, left 1s ease;
+}
+.sun {
+  width: 86px; height: 86px;
+  background: #fff8d6;
+  box-shadow:
+    0 0 18px 8px rgba(255, 244, 210, 0.95),
+    0 0 60px 24px rgba(255, 214, 140, 0.35);
+  top: 12%; left: 72%;
+}
+.sun-glow {
+  width: 420px; height: 420px;
+  background: radial-gradient(circle, rgba(255, 236, 180, 0.55) 0%, rgba(255, 220, 140, 0.16) 32%, transparent 68%);
+  top: calc(10% - 167px); left: calc(74% - 167px);
+  filter: blur(8px);
+}
+.sun-rays {
+  width: 560px; height: 560px;
+  top: calc(10% - 237px); left: calc(74% - 237px);
+  border-radius: 50%;
+  background: repeating-conic-gradient(
+    from 8deg,
+    rgba(255, 244, 210, 0.16) 0deg 7deg,
+    transparent 7deg 28deg
+  );
+  filter: blur(6px);
+  mix-blend-mode: screen;
+}
+.haze {
+  position: absolute; inset: 0; opacity: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse at 70% 12%, rgba(255, 248, 230, 0.55), transparent 42%),
+    linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255, 236, 210, 0.12) 70%, rgba(255, 226, 180, 0.2));
+}
+.cirrus {
+  position: absolute; inset: 0; opacity: 0; pointer-events: none;
+  background:
+    radial-gradient(320px 28px at 18% 16%, rgba(255,255,255,0.28), transparent 70%),
+    radial-gradient(260px 22px at 38% 13%, rgba(255,255,255,0.18), transparent 70%),
+    radial-gradient(380px 24px at 62% 20%, rgba(255,255,255,0.16), transparent 72%),
+    radial-gradient(240px 18px at 84% 15%, rgba(255,255,255,0.2), transparent 70%);
+  filter: blur(1.5px);
+}
+.moon {
+  /* Keep your existing position/top/right/width/height if you prefer your current size */
+  position: absolute;
+  top: 40px;
+  right: 60px;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  
+  /* Solid off-white base instead of a glossy gradient */
+  background-color: #e2e8f0;
+  
+  /* Outer glow + heavy inset shadow to create a lunar phase depth */
+  box-shadow: 
+    0 0 40px rgba(255, 255, 255, 0.4), 
+    inset -15px -15px 25px rgba(0, 0, 0, 0.3);
+    
+  /* Multiple radial gradients acting as subtle craters */
+  background-image: 
+    radial-gradient(circle at 30% 30%, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.08) 12%, transparent 14%),
+    radial-gradient(circle at 70% 60%, rgba(0,0,0,0.12) 0%, rgba(0,0,0,0.12) 18%, transparent 20%),
+    radial-gradient(circle at 45% 80%, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.08) 10%, transparent 12%),
+    radial-gradient(circle at 80% 30%, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.06) 14%, transparent 16%);
+
+}
+body[class*="sunrise"] .sun { opacity: 1; top: 58%; left: 14%; }
+body[class*="day-clear"] .sun,
+body[class*="day-cloudy"] .sun { opacity: 1; top: 10%; left: 74%; }
+body.theme-day-clear .sun-glow,
+body.theme-day-clear .sun-rays,
+body.theme-day-clear .haze,
+body.theme-day-clear .cirrus { opacity: 1; }
+body.theme-day-clear .sun-rays { animation: sunwash 18s linear infinite; }
+body[class*="sunset"] .sun { opacity: 1; top: 62%; left: 78%; }
+@keyframes sunwash { to { transform: rotate(20deg); } }
+body[class*="night"] .moon { opacity: 1; }
+body[class*="fog"] .sun, body[class*="rain"] .sun, body[class*="storm"] .sun { filter: blur(6px); opacity: 0.35; }
+body[class*="night"][class*="clear"] .moon { opacity: 1; }
+
+.stars { position: absolute; inset: 0; opacity: 0; background-image:
+  radial-gradient(2px 2px at 10% 20%, #fff, transparent),
+  radial-gradient(2px 2px at 30% 40%, #fff, transparent),
+  radial-gradient(1px 1px at 70% 15%, #fff, transparent),
+  radial-gradient(2px 2px at 85% 35%, #fff, transparent),
+  radial-gradient(1px 1px at 55% 60%, #fff, transparent),
+  radial-gradient(1px 1px at 20% 75%, #fff, transparent),
+  radial-gradient(2px 2px at 45% 10%, #fff, transparent);
+}
+body[class*="night"] .stars { opacity: 0.85; animation: twinkle 3.8s ease-in-out infinite; }
+@keyframes twinkle { 50% { opacity: 0.45; } }
+
+.clouds { position: absolute; inset: 0; opacity: 0; background:
+  radial-gradient(140px 50px at 20% 22%, rgba(255,255,255,0.55), transparent 70%),
+  radial-gradient(180px 60px at 48% 18%, rgba(255,255,255,0.4), transparent 70%),
+  radial-gradient(160px 55px at 78% 26%, rgba(255,255,255,0.5), transparent 70%);
+  animation: drift 40s linear infinite;
+}
+body[class*="cloudy"] .clouds, body[class*="rain"] .clouds, body[class*="storm"] .clouds, body[class*="fog"] .clouds { opacity: 1; }
+body[class*="night"] .clouds { filter: brightness(0.55); }
+@keyframes drift { from { transform: translateX(0); } to { transform: translateX(-8%); } }
+
+.fog { position: absolute; inset: 0; opacity: 0; background:
+  linear-gradient(180deg, rgba(230,236,240,0.15), rgba(230,236,240,0.55) 40%, rgba(210,220,226,0.7));
+  filter: blur(10px);
+}
+body[class*="fog"] .fog { opacity: 1; animation: fogpulse 6s ease-in-out infinite; }
+@keyframes fogpulse { 50% { opacity: 0.7; } }
+
+.rain, .snow { position: absolute; inset: 0; overflow: hidden; }
+.drop, .flake { position: absolute; top: -10%; }
+.drop {
+  width: 2px; height: 14px; background: rgba(210, 230, 255, 0.7);
+  animation: fall linear infinite;
+}
+.flake {
+  width: 6px; height: 6px; border-radius: 50%; background: #fff;
+  opacity: 0.85; animation: fall linear infinite;
+}
+@keyframes fall { to { transform: translateY(120vh); } }
+.lightning { position: absolute; inset: 0; background: #fff; opacity: 0; }
+body.theme-day-storm .lightning, body.theme-night-storm .lightning,
+body.theme-sunrise-storm .lightning, body.theme-sunset-storm .lightning {
+  animation: flash 5s linear infinite;
+}
+@keyframes flash { 0%, 92%, 100% { opacity: 0; } 93% { opacity: 0.55; } 95% { opacity: 0; } 97% { opacity: 0.3; } }
+
+header, main, footer, .toolbar, .now-grid, .split, #outlook-card, #advisor-card, #daily-card, #hourly-wrap, .status {
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 24px;
+  padding-right: 24px;
+  position: relative;
+  z-index: 1;
+}
+header { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; padding-top: 24px; }
+.eyebrow { letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); font-size: 12px; margin: 0 0 6px; }
+h1 { margin: 0 0 8px; font-size: 36px; }
+h2 { margin: 0 0 12px; font-size: 18px; }
+.lede { color: var(--muted); max-width: 58ch; }
+.badge { border: 1px solid var(--line); padding: 8px 12px; border-radius: 999px; color: var(--muted); white-space: nowrap; backdrop-filter: blur(10px); }
+main { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 18px; padding: 24px; }
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 18px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+}
+.toolbar { display: flex; gap: 12px; align-items: end; margin-top: 8px; }
+.toolbar .grow { flex: 1; }
+.now-grid, .split { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 12px auto; }
+.status { margin: 12px auto; }
+form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--muted); }
+input, select, button {
+  background: rgba(8, 12, 18, 0.35); color: inherit; border: 1px solid var(--line);
+  border-radius: 10px; padding: 10px; font: inherit;
+}
+button { background: var(--accent); color: #102033; font-weight: 700; cursor: pointer; border: 0; }
+form button { grid-column: 1 / -1; }
+.toolbar button { white-space: nowrap; height: 42px; }
+.aqi-num { font-size: 64px; margin: 0; line-height: 1; }
+.temp-num { font-size: 52px; margin: 0; line-height: 1; }
+.cat { font-weight: 700; margin: 6px 0 12px; }
+.hint, footer { color: var(--muted); font-size: 14px; }
+footer { padding-bottom: 40px; }
+.bars { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.bar-row { display: grid; grid-template-columns: 70px 1fr 48px; gap: 8px; align-items: center; font-size: 13px; }
+.track { height: 8px; background: rgba(0,0,0,0.2); border-radius: 99px; overflow: hidden; }
+.fill { height: 100%; background: var(--accent); }
+ul { padding-left: 18px; }
+.meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; color: var(--muted); font-size: 14px; margin-top: 12px; }
+.days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+.day {
+  background: rgba(0,0,0,0.16); border: 1px solid var(--line); border-radius: 12px; padding: 10px;
+  min-height: 140px;
+}
+.day b { display: block; margin-bottom: 6px; }
+.pill { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 12px; font-weight: 700; color: #111; }
+.table-wrap { overflow: auto; max-height: 360px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { text-align: left; padding: 6px 4px; border-bottom: 1px solid var(--line); }
+.error { color: #fecaca; }
+.sky-chip { display: inline-flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.sky-chip span {
+  border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; font-size: 12px;
+}
+.advisor .score-row { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: baseline; margin: 8px 0 12px; }
+.advisor .score { font-size: 28px; font-weight: 700; }
+.advisor .level { font-weight: 700; }
+.advisor-group { margin: 14px 0 6px; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.chip {
+  display: inline-flex; gap: 6px; align-items: center;
+  border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; font-size: 13px; cursor: pointer;
+}
+.chip input { margin: 0; }
+.advisor-personalize { margin-top: 14px; }
+.advisor-personalize summary { cursor: pointer; font-weight: 700; }
+.advisor .why { display: grid; gap: 4px; margin: 8px 0 12px; font-size: 14px; color: var(--muted); }
+.factor-pos { color: inherit; }
+.factor-neg { opacity: 0.95; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+@media (max-width: 900px) {
+  main, form, .now-grid, .split, .days, .toolbar { grid-template-columns: 1fr; display: grid; }
+  .toolbar { align-items: stretch; }
+  header { flex-direction: column; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .clouds, .stars, .drop, .flake, .lightning, .fog { animation: none !important; }
+}
+/* Dashboard Tab Navigation */
+/* --- NEW SIDEBAR & APP LAYOUT --- */
+body {
+  margin: 0;
+  overflow: hidden; /* Prevents double scrolling */
+}
+
+.app-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* Vertical Left Sidebar */
+.sidebar {
+  width: 70px;
+  background: rgba(15, 23, 42, 0.4);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Align to the left instead of center */
+  padding: 20px 12px 0 12px;
+  gap: 20px;
+  z-index: 10;
+  transition: width 0.3s ease; /* Smooth slide animation */
+}
+.sidebar.expanded{
+  width: 220px;
+}
+
+/* 3-Lines Hamburger Icon */
+.menu-icon {
+  font-size: 26px;
+  color: #e2e8f0;
+  cursor: pointer;
+  margin-bottom: 15px;
+  margin-left: 8px; /* Align with circles */
+  transition: color 0.2s;
+}
+.menu-icon:hover {
+  color: #3b82f6;
+}
+
+/* Vertical Circular Tab Buttons */
+.dash-tab {
+  width: 44px;
+  height: 44px;
+  border-radius: 22px; /* Capsule shape when expanded */
+  background: transparent;
+  border: 1px solid transparent;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding-left: 8px;
+  overflow: hidden;
+ 
+}
+.sidebar.expanded.dash-tab{
+  width: 100%;
+}
+
+.dash-tab:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.dash-tab.active {
+  background: #3b82f6;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+/* Icon & Text Spans */
+.icon {
+  font-size: 1.4rem;
+  min-width: 26px;
+  text-align: center;
+}
+.tab-text {
+  display: none;
+  margin-left: 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.sidebar.expanded .tab-text {
+  display: inline-block;
+}
+/*---------------------------------------
+
+/* Right Content Area */
+.main-content {
+  flex: 1;
+  padding: 20px 40px;
+  overflow-y: auto;
+  z-index: 1;
+}
+
+/* Ensure cards are slightly translucent so the moon shows through */
+.card {
+  background: rgba(20, 30, 50, 0.6) !important; 
+  backdrop-filter: blur(10px);
+}
+/* --- CRITICAL: TAB VISIBILITY LOGIC --- */
+.tab-pane {
+  display: none;
+  animation: fadeIn 0.25s ease-in-out;
+}
+
+.tab-pane.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+/* --- CRITICAL: SIDEBAR EXPANSION & TEXT REVEAL --- */
+
+/* 1. Make the buttons stretch into a capsule shape when expanded */
+.sidebar.expanded .dash-tab {
+  width: 90%; 
+}
+
+/* 2. Style the icons so they stay aligned */
+.icon {
+  font-size: 1.4rem;
+  min-width: 26px;
+  text-align: center;
+}
+
+/* 3. Hide the text by default */
+.tab-text {
+  display: none; 
+  margin-left: 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* 4. Reveal the text when the hamburger menu is clicked */
+.sidebar.expanded .tab-text {
+  display: inline-block; 
+}
