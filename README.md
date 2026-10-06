@@ -41,7 +41,7 @@ Open-Meteo / wttr.in / WAQI
 
 ## Getting started
 ```bash
-git clone https://github.com/<your-username>/VayuMitra.git
+git clone https://github.com/VayuMitra.git
 cd VayuMitra
 python -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
